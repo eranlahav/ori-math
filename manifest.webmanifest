@@ -1,0 +1,19 @@
+{
+  "name": "Ori Math · שֻׁלְחַן הָעֲבוֹדָה שֶׁל אוֹרִי",
+  "short_name": "Ori Math",
+  "description": "חיבור וחיסור עד 20 בשולחן העבודה, למאינקראפטרים צעירים",
+  "lang": "he",
+  "dir": "rtl",
+  "id": "/ori-math/",
+  "start_url": "/ori-math/",
+  "scope": "/ori-math/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#2b2118",
+  "theme_color": "#2b2118",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
