@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#2b2118">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<title>Ori Math</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&display=swap">
+<style>
+/* One screen, top to bottom: story → what to do → the buckets (drag them) → the answer → a keyboard.
+   Minecraft feel from the pixel items and stone/wood panels; everything else is big and plain. */
+:root{--s:84px;--ui:#c6c6c6;--paper:#f6f1e4;--ink:#1d2340;--gold:#ffcf4a;--em:#3ad17a;--em2:#1f9d55}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;color:#fff;font-family:Rubik,'Noto Sans Hebrew',Arial,sans-serif;background:#4a3320}
+body{background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),repeating-conic-gradient(#6b4a2b 0 25%,#5e4026 0 50%) 0 0/56px 56px}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+svg{display:block;width:100%;height:100%}
+.screen{position:fixed;inset:0;display:none;flex-direction:column}
+.screen.on{display:flex}
+.blk{background:#6f6f6f;color:#fff;font-weight:700;font-size:22px;padding:10px 16px;border-radius:3px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.35),inset 4px 4px 0 rgba(255,255,255,.18),0 0 0 3px #000}
+.blk.green{background:var(--em2)}
+.blk:active{transform:translateY(2px)}
+.gems{display:flex;align-items:center;gap:6px;font-size:26px;font-weight:800;text-shadow:2px 2px 0 #000}
+.gems i{width:32px;height:32px;display:block}
+
+/* home */
+#home{align-items:center;justify-content:center;gap:28px}
+#home h1{font-size:52px;margin:0;text-shadow:4px 4px 0 #000;text-align:center}
+#home h1 small{display:block;font-size:20px;opacity:.75;letter-spacing:1px;margin-top:4px}
+#startBtn{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--ui);color:#222;padding:24px 56px 20px;border-radius:4px;font-size:40px;font-weight:800;
+  box-shadow:inset -6px -6px 0 #555,inset 6px 6px 0 #fff,0 0 0 4px #000,0 10px 0 #0007}
+#startBtn .art{width:140px;height:140px}
+#home .gems{position:fixed;top:14px;left:18px}
+#home .corner{position:fixed;bottom:14px;left:14px;display:flex;gap:10px}
+
+/* play */
+.top{display:flex;align-items:center;gap:14px;padding:10px 16px 0}
+.top .sp{flex:1}
+.pips{display:flex;gap:6px}
+.pips i{width:18px;height:18px;background:#0007;display:block;box-shadow:0 0 0 2px #000}
+.pips i.on{background:var(--em)}.pips i.miss{background:#d88a2a}.pips i.cur{background:var(--gold)}
+.story{margin:10px 16px 0;background:var(--paper);color:var(--ink);border-radius:4px;padding:12px 22px 12px 70px;position:relative;box-shadow:0 0 0 4px #000,inset -5px -5px 0 #d8ceb4}
+#lines{font-size:34px;font-weight:700;line-height:1.45}
+#lines .q{color:#7a3d00}
+#say{position:absolute;top:50%;left:12px;transform:translateY(-50%);width:50px;height:50px;font-size:28px;background:#0000000f;border-radius:50%}
+.steps{display:flex;justify-content:center;gap:14px;margin:12px 16px 0}
+.step{display:flex;align-items:center;gap:10px;background:#0009;border-radius:30px;padding:6px 18px 6px 8px;font-size:24px;font-weight:700;opacity:.55;box-shadow:0 0 0 2px #000}
+.step b{width:36px;height:36px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-size:22px}
+.step.now{opacity:1;box-shadow:0 0 0 3px var(--gold)}
+.step.done{opacity:1}
+.step.done b{background:var(--em2);color:#fff}
+.dots{display:flex;gap:5px;margin-right:4px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid #fff;display:block}
+.dots i.on{background:var(--gold);border-color:var(--gold)}
+
+.play{flex:1;display:flex;gap:22px;justify-content:center;align-items:center;padding:8px 16px;min-height:0}
+.box{background:var(--ui);border-radius:4px;box-shadow:inset -5px -5px 0 #555,inset 5px 5px 0 #fff,0 0 0 4px #000;padding:10px 14px 14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.box h3{margin:0;font-size:22px;color:#333;display:flex;align-items:center;gap:8px}
+.frame{direction:ltr;display:grid;grid-template-columns:repeat(5,var(--s));gap:6px}
+.slot{width:var(--s);height:var(--s);background:#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff;position:relative;display:flex;align-items:center;justify-content:center}
+.zone{width:calc(var(--s)*4.3);min-height:calc(var(--s)*2 + 6px);border-radius:6px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:6px;padding:8px;direction:ltr;max-width:calc(var(--s)*5 + 40px)}
+.zone.puddle{background:radial-gradient(ellipse at 50% 55%,#5aa0e6 0 45%,#3d78c4 46% 60%,#0000 61%),#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff}
+.zone.plain{background:#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff}
+.zone.hot,.frame.hot .slot{outline:4px dashed var(--gold);outline-offset:-4px}
+.who{width:46px;height:46px}
+.item{width:var(--s);height:var(--s);padding:7px;position:relative;touch-action:none;cursor:grab;border-radius:4px}
+.zone .item{background:#0002}
+.item.sel{background:#ffcf4a88;box-shadow:0 0 0 4px var(--gold)}
+.item.ghosted{opacity:.25}
+.item .num{position:absolute;top:-10px;right:-6px;background:var(--em2);color:#fff;font-size:22px;font-weight:800;min-width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #000;direction:ltr}
+.drag{position:fixed;z-index:60;pointer-events:none;width:var(--s);height:var(--s);padding:7px;filter:drop-shadow(4px 6px 0 #0006)}
+.hint{font-size:19px;color:#fff;text-shadow:2px 2px 0 #000;text-align:center;opacity:.85;margin-top:-2px}
+
+/* answer + keyboard */
+.answer{display:flex;align-items:center;justify-content:center;gap:24px;padding:2px 16px}
+#eq{direction:ltr;display:flex;align-items:center;gap:14px;font-size:54px;font-weight:800;text-shadow:3px 3px 0 #000}
+#field{min-width:120px;height:78px;background:#fff;color:var(--ink);text-shadow:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 0 0 4px #000,inset 0 3px 6px #0003;position:relative}
+#field.active{box-shadow:0 0 0 4px #000,0 0 0 9px var(--gold),inset 0 3px 6px #0003}
+#field.active:not(.has)::after,#field.active.has::after{content:"";width:4px;height:52px;background:var(--ink);margin-left:4px;animation:blink 1s steps(1) infinite}
+#field.good{background:#d6ffe2;box-shadow:0 0 0 4px #000,0 0 0 9px var(--em)}
+#field.bad{animation:shake .35s}
+#msg{font-size:28px;font-weight:800;text-shadow:2px 2px 0 #000;min-width:260px;text-align:center}
+#next{font-size:30px;padding:12px 30px;display:none}
+.kbd{direction:ltr;margin:8px auto 14px;background:#2b2b30;border-radius:16px;padding:12px;display:grid;grid-template-columns:repeat(10,1fr) 1.3fr 2.2fr;gap:10px;width:min(1100px,calc(100vw - 32px));box-shadow:0 8px 0 #111,0 0 0 3px #000}
+.kbd button{height:74px;background:linear-gradient(#fbfbfb,#e4e4e8);color:#222;border-radius:10px;font-size:36px;font-weight:800;box-shadow:0 6px 0 #9a9aa2,0 7px 0 #000}
+.kbd button:active{transform:translateY(5px);box-shadow:0 1px 0 #9a9aa2,0 2px 0 #000}
+.kbd .bs{font-size:30px;background:linear-gradient(#e9e9ee,#cfcfd6)}
+.kbd .enter{background:linear-gradient(#3fcf7a,#22a05a);color:#fff;font-size:28px;box-shadow:0 6px 0 #146b3a,0 7px 0 #000}
+.kbd.off{opacity:.35;pointer-events:none}
+@keyframes blink{50%{opacity:0}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pop{50%{transform:scale(1.25)}}
+.pop{animation:pop .35s}
+
+#cele,#parent{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;z-index:80}
+#cele.on,#parent.on{display:flex}
+#cele .big{font-size:48px;font-weight:800;text-shadow:4px 4px 0 #000;text-align:center;line-height:1.4}
+#celeArt{width:150px;height:150px}
+#parent .panel{background:#2d2d2d;border-radius:6px;padding:20px 24px;width:min(640px,92vw);max-height:90vh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 0 4px #000}
+#parent label{display:flex;justify-content:space-between;align-items:center;font-size:20px;gap:12px}
+#parent input[type=checkbox]{width:28px;height:28px}
+#stats{font-size:17px;line-height:1.6}
+#stats span{direction:ltr;display:inline-block;background:#0006;padding:0 6px;margin:2px;border-radius:3px}
+@media (orientation:portrait){ .play{flex-direction:column;gap:12px} .kbd{grid-template-columns:repeat(5,1fr) ;} .kbd .bs,.kbd .enter{grid-column:span 5} .kbd button{height:64px} }
+</style>
+</head>
+<body>
+
+<section id="home" class="screen on">
+  <div class="gems"><i class="gemIcon"></i><span class="gemN">0</span></div>
+  <h1>הַדְּלָיִים שֶׁל אוֹרִי<small>Ori Math</small></h1>
+  <button id="startBtn"><div class="art" id="startArt"></div>שַׂחֵק</button>
+  <div class="corner"><button class="blk" id="fsBtn">⛶</button><button class="blk" id="parentBtn">⚙️</button></div>
+</section>
+
+<section id="play" class="screen">
+  <div class="top">
+    <button class="blk" id="homeBtn">🏠</button>
+    <div class="pips" id="pips"></div>
+    <div class="sp"></div>
+    <div class="gems"><i class="gemIcon"></i><span class="gemN">0</span></div>
+  </div>
+  <div class="story"><div id="lines"></div><button id="say" title="הקראה">🔊</button></div>
+  <div class="steps">
+    <div class="step" id="step1"><b>1</b><span id="step1t"></span><span class="dots" id="dots"></span></div>
+    <div class="step" id="step2"><b>2</b><span>כְּתֹב אֶת הַתְּשׁוּבָה</span></div>
+  </div>
+  <div class="play">
+    <div class="box"><h3>הַמְּלַאי שֶׁלְּךָ</h3><div class="frame drop" data-z="inv" id="inv"></div></div>
+    <div class="box"><h3 id="zoneTitle"></h3><div class="zone drop" data-z="zone" id="zone"></div></div>
+  </div>
+  <div class="hint">אֶפְשָׁר לִגְרֹר דְּלִי. אֶפְשָׁר גַּם לִגַּעַת בְּכַמָּה דְּלָיִים וְלִגְרֹר אוֹתָם בְּיַחַד.</div>
+  <div class="answer">
+    <div id="eq"></div>
+    <div id="msg"></div>
+    <button class="blk green" id="next">הַבָּא ◀</button>
+  </div>
+  <div class="kbd" id="kbd"></div>
+</section>
+
+<div id="cele"><div id="celeArt"></div><div class="big" id="celeText"></div><button class="blk green" id="celeOk" style="font-size:30px;padding:14px 34px">יֵשׁ!</button></div>
+<div id="parent"><div class="panel">
+  <h2 style="margin:0">להורים</h2>
+  <label>חובה להזיז את הדליים לפני שכותבים <input type="checkbox" id="optDrag"></label>
+  <div id="stats"></div>
+  <div style="display:flex;gap:12px;justify-content:space-between">
+    <button class="blk" id="resetBtn" style="background:#8a2b2b">איפוס התקדמות</button>
+    <button class="blk green" id="parentClose">סגור</button>
+  </div>
+  <div style="font-size:14px;opacity:.7">נשמר במכשיר בלבד (ori.math.v2).</div>
+</div></div>
+
+<script src="items.js"></script>
+<script>
+"use strict";{
+/* ---------------- content (full nikud; numbers as digits) ---------------- */
+// Each story: op, what the side box is, where buckets go, and the words.
+const STORIES = [
+  {op:"-", zone:"שְׁלוּלִית", who:"water", puddle:true, gone:"bucket",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `אוֹי! ${b} נִשְׁפְּכוּ.`], q:"כַּמָּה דְּלָיֵי מַיִם נִשְׁאֲרוּ?",
+   todo:(b)=>`גְּרֹר ${b} דְּלָיִים לַשְּׁלוּלִית`},
+  {op:"-", zone:"הַכַּפְרִי", who:"villager",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `נָתַתָּ לַכַּפְרִי ${b}.`], q:"כַּמָּה דְּלָיִים נִשְׁאֲרוּ לְךָ?",
+   todo:(b)=>`גְּרֹר ${b} דְּלָיִים לַכַּפְרִי`},
+  {op:"+", zone:"תֵּבָה", who:"chest",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `בַּתֵּבָה מָצָאתָ עוֹד ${b}.`], q:"כַּמָּה דְּלָיִים יֵשׁ לְךָ עַכְשָׁו?",
+   todo:()=>`גְּרֹר אֶת הַדְּלָיִים מֵהַתֵּבָה לַמְּלַאי`},
+  {op:"+", zone:"צָ׳ארְלִי", who:"dog",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `צָ׳ארְלִי הֵבִיא לְךָ עוֹד ${b}.`], q:"כַּמָּה דְּלָיִים יֵשׁ לְךָ עַכְשָׁו?",
+   todo:()=>`גְּרֹר אֶת הַדְּלָיִים שֶׁל צָ׳ארְלִי לַמְּלַאי`},
+];
+const ROUND=8, MAX=10;
+
+/* ---------------- storage ---------------- */
+const KEY="ori.math.v2";
+const blank=()=>({gems:0, log:[], requireDrag:true});
+let S; try{ S=Object.assign(blank(), JSON.parse(localStorage.getItem(KEY)||"{}")); }catch(e){ S=blank(); }
+const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
+
+/* ---------------- helpers ---------------- */
+const $=s=>document.querySelector(s);
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+document.querySelectorAll(".gemIcon").forEach(e=>e.innerHTML=ITEMS.emerald);
+$("#startArt").innerHTML=ITEMS.water;
+const gemsUI=()=>document.querySelectorAll(".gemN").forEach(e=>e.textContent=S.gems);
+const show=id=>document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
+function sizeUI(){ const W=innerWidth,H=innerHeight;
+  const s = H>W ? Math.min(90,(W-90)/5.6, H*0.07) : Math.min(92,(W-120)/11.2, H*0.105);
+  document.documentElement.style.setProperty("--s", Math.max(48,s)+"px"); }
+addEventListener("resize",sizeUI); sizeUI();
+
+/* ---------------- round ---------------- */
+let R, Q;
+function newQuestion(prev){
+  for(let i=0;i<100;i++){
+    const st=pick(STORIES); let a,b;
+    if(st.op==="-"){ a=3+rnd(MAX-2); b=1+rnd(a-1); } else { a=1+rnd(MAX-2); b=1+rnd(Math.min(6,MAX-a)); }
+    if(prev && prev.a===a && prev.b===b) continue;
+    if(prev && prev.st===st && Math.random()<.7) continue;
+    return {st,a,b,ans:st.op==="-"?a-b:a+b};
+  }
+}
+function startRound(){ R={i:0, qs:[], res:[]}; let p=null; for(let i=0;i<ROUND;i++){ p=newQuestion(p); R.qs.push(p); } show("play"); sizeUI(); loadQ(); }
+function pipsUI(){ $("#pips").innerHTML=R.qs.map((_,i)=>`<i class="${i<R.res.length?(R.res[i]?"on":"miss"):i===R.i?"cur":""}"></i>`).join(""); }
+
+function loadQ(){
+  const q=R.qs[R.i];
+  Q=Object.assign({},q,{typed:"",tries:0,done:false,t0:Date.now(),sel:new Set()});
+  const st=Q.st;
+  // items: k = id, z = "inv" | "zone"
+  Q.items=[]; for(let k=0;k<Q.a;k++) Q.items.push({k,z:"inv"});
+  if(st.op==="+") for(let k=0;k<Q.b;k++) Q.items.push({k:Q.a+k,z:"zone"});
+  $("#lines").innerHTML=st.lines(Q.a,Q.b).map(l=>`<div>${l}</div>`).join("")+`<div class="q">${st.q}</div>`;
+  $("#step1t").textContent=st.todo(Q.b);
+  $("#zoneTitle").innerHTML=`<span class="who">${ITEMS[st.who]}</span>${st.zone}`;
+  $("#zone").className="zone drop "+(st.puddle?"puddle":"plain");
+  $("#msg").textContent=""; $("#next").style.display="none"; $("#msg").style.display="";
+  pipsUI(); gemsUI(); render(); fieldUI();
+}
+
+const inZone=()=>Q.items.filter(i=>i.z==="zone").length;
+const moveDone=()=> Q.st.op==="-" ? inZone()===Q.b : inZone()===0;
+
+function itemHTML(it){
+  const id = it.z==="zone" && Q.st.gone ? Q.st.gone : "water";
+  return `<div class="item${Q.sel.has(it.k)?" sel":""}" data-k="${it.k}">${ITEMS[id]}</div>`;
+}
+function render(){
+  const inv=Q.items.filter(i=>i.z==="inv"), zn=Q.items.filter(i=>i.z==="zone");
+  $("#inv").innerHTML=Array.from({length:MAX},(_,i)=>`<div class="slot">${inv[i]?itemHTML(inv[i]):""}</div>`).join("");
+  $("#zone").innerHTML=zn.map(itemHTML).join("");
+  // step 1 progress
+  const need = Q.st.op==="-" ? Q.b : Q.b, have = Q.st.op==="-" ? zn.length : Q.b-zn.length;
+  $("#dots").innerHTML=Array.from({length:need},(_,i)=>`<i class="${i<have?"on":""}"></i>`).join("");
+  const ok=moveDone();
+  $("#step1").className="step "+(ok?"done":"now");
+  $("#step2").className="step "+(Q.done?"done":ok?"now":"");
+  $("#kbd").classList.toggle("off", Q.done || (S.requireDrag && !ok));
+  fieldUI();
+  if(!ok && Q.st.op==="-" && zn.length>Q.b) $("#msg").textContent=`צָרִיךְ רַק ${Q.b}. הַחְזֵר אֶחָד.`;
+  else if(!Q.done && !Q.tries) $("#msg").textContent = ok ? "עַכְשָׁו כְּתֹב בַּמִּקְלֶדֶת" : "";
+}
+function fieldUI(final){
+  const st=Q.st, active=!Q.done && (!S.requireDrag || moveDone());
+  const val = final!==undefined ? final : Q.typed;
+  $("#eq").innerHTML=`<span>${Q.a}</span><span>${st.op==="-"?"−":"+"}</span><span>${Q.b}</span><span>=</span>
+    <span id="field" class="${active?"active":""} ${val!==""?"has":""} ${Q.done?"good":""}">${val}</span>`;
+}
+
+/* ---------------- drag, tap-to-select, tap-to-move ---------------- */
+let P=null;
+function cap(z){ return z==="inv"? MAX : MAX; }
+function moveTo(keys, z){
+  const room = cap(z) - Q.items.filter(i=>i.z===z).length;
+  let moved=0;
+  Q.items.forEach(it=>{ if(keys.includes(it.k) && it.z!==z && moved<room){ it.z=z; moved++; } });
+  // keep zone items in the order they arrived
+  Q.items.sort((x,y)=>0);
+  Q.sel.clear(); render();
+}
+function dropAt(x,y){ const el=document.elementFromPoint(x,y); const d=el && el.closest(".drop"); return d? d.dataset.z : null; }
+document.addEventListener("pointerdown",e=>{
+  if(!$("#play").classList.contains("on") || Q.done) return;
+  const itEl=e.target.closest(".item");
+  if(itEl){ P={k:+itEl.dataset.k, x:e.clientX, y:e.clientY, drag:false, el:itEl}; e.preventDefault(); return; }
+  const d=e.target.closest(".drop");
+  if(d && Q.sel.size){ moveTo([...Q.sel], d.dataset.z); }
+});
+document.addEventListener("pointermove",e=>{
+  if(!P) return;
+  if(!P.drag && Math.hypot(e.clientX-P.x,e.clientY-P.y)>10){
+    P.drag=true;
+    P.keys = Q.sel.has(P.k) ? [...Q.sel] : [P.k];
+    P.ghosts = P.keys.map((k,i)=>{ const g=document.createElement("div"); g.className="drag"; g.innerHTML=ITEMS.water; document.body.appendChild(g); return g; });
+    P.keys.forEach(k=>{ const el=document.querySelector(`.item[data-k="${k}"]`); el && el.classList.add("ghosted"); });
+  }
+  if(P.drag){
+    const s=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--s"));
+    P.ghosts.forEach((g,i)=>{ g.style.left=(e.clientX-s/2+i*s*0.28)+"px"; g.style.top=(e.clientY-s/2-i*s*0.12)+"px"; });
+    const z=dropAt(e.clientX,e.clientY);
+    $("#inv").classList.toggle("hot", z==="inv"); $("#zone").classList.toggle("hot", z==="zone");
+  }
+});
+function endPointer(e){
+  if(!P) return;
+  if(P.drag){
+    P.ghosts.forEach(g=>g.remove()); $("#inv").classList.remove("hot"); $("#zone").classList.remove("hot");
+    const z=dropAt(e.clientX,e.clientY);
+    if(z) moveTo(P.keys, z); else render();
+  } else {
+    Q.sel.has(P.k) ? Q.sel.delete(P.k) : Q.sel.add(P.k); render();
+  }
+  P=null;
+}
+document.addEventListener("pointerup",endPointer);
+document.addEventListener("pointercancel",e=>{ if(P&&P.ghosts) P.ghosts.forEach(g=>g.remove()); P=null; render(); });
+
+/* ---------------- keyboard ---------------- */
+function buildKbd(){
+  const k=$("#kbd"); k.innerHTML="";
+  const add=(t,c,fn)=>{ const b=document.createElement("button"); b.innerHTML=t; if(c) b.className=c; b.onclick=fn; k.appendChild(b); };
+  [1,2,3,4,5,6,7,8,9,0].forEach(n=>add(n,"",()=>typeKey(String(n))));
+  add("⌫","bs",()=>typeKey("bs"));
+  add("בְּדִיקָה ↵","enter",()=>typeKey("enter"));
+}
+function typeKey(k){
+  if(!Q || Q.done || $("#kbd").classList.contains("off")) return;
+  if(k==="bs") Q.typed=Q.typed.slice(0,-1);
+  else if(k==="enter") return check();
+  else { if(Q.typed.length>=2) return; Q.typed=(Q.typed+k).replace(/^0(\d)/,"$1"); }
+  fieldUI();
+}
+addEventListener("keydown",e=>{ if(!$("#play").classList.contains("on")) return;
+  if(/^[0-9]$/.test(e.key)) typeKey(e.key); else if(e.key==="Backspace") typeKey("bs"); else if(e.key==="Enter") typeKey("enter"); });
+
+/* ---------------- checking ---------------- */
+async function countAlong(){
+  // number the buckets left in the inventory, one by one
+  $("#kbd").classList.add("off");
+  const els=[...document.querySelectorAll("#inv .item")];
+  for(let i=0;i<els.length;i++){ const n=document.createElement("span"); n.className="num"; n.textContent=i+1; els[i].appendChild(n); els[i].classList.add("pop"); await sleep(550); }
+  await sleep(500);
+}
+async function check(){
+  if(Q.typed==="") return;
+  const v=parseInt(Q.typed,10);
+  S.log.push({d:Date.now(),op:Q.st.op,a:Q.a,b:Q.b,ans:Q.ans,v,m:moveDone()?1:0,s:Math.round((Date.now()-Q.t0)/1000)}); if(S.log.length>500) S.log=S.log.slice(-500);
+  if(v===Q.ans){
+    Q.done=true; const first=Q.tries===0; R.res[R.i]=first; if(first) S.gems++; save(); gemsUI();
+    $("#msg").textContent = pick(["נָכוֹן!","כׇּל הַכָּבוֹד, אוֹרִי!","יֵשׁ! נָכוֹן!"]) + (first?" +1 💎":"");
+    render(); fieldUI(Q.typed); $("#next").style.display="block";
+  } else {
+    Q.tries++; save();
+    const f=$("#field"); f.classList.remove("bad"); void f.offsetWidth; f.classList.add("bad");
+    if(Q.tries===1){
+      $("#msg").textContent="כִּמְעַט! בּוֹא נִסְפֹּר יַחַד.";
+      if(!moveDone()){ // put the right buckets in place first, so the count shows the answer's picture
+        if(Q.st.op==="-"){ Q.items.forEach(i=>i.z="inv"); Q.items.slice(-Q.b).forEach(i=>i.z="zone"); } else Q.items.forEach(i=>i.z="inv");
+        render(); await sleep(500);
+      }
+      await countAlong();
+      Q.typed=""; $("#msg").textContent="עַכְשָׁו כְּתֹב שׁוּב."; render();
+    } else {
+      Q.done=true; R.res[R.i]=false; save();
+      $("#msg").textContent=`הַתְּשׁוּבָה: ${Q.ans}`;
+      render(); fieldUI(String(Q.ans)); $("#next").style.display="block";
+    }
+  }
+}
+$("#next").onclick=()=>{ R.i++; if(R.i>=ROUND) endRound(); else loadQ(); };
+function endRound(){
+  const good=R.res.filter(Boolean).length; pipsUI();
+  $("#celeArt").innerHTML=ITEMS[good>=6?"diamond":"emerald"];
+  $("#celeText").innerHTML=`סִיַּמְתָּ!<br>${good} מִתּוֹךְ ${ROUND} בְּנִסָּיוֹן רִאשׁוֹן`;
+  $("#cele").classList.add("on");
+}
+$("#celeOk").onclick=()=>{ $("#cele").classList.remove("on"); gemsUI(); show("home"); };
+$("#startBtn").onclick=startRound;
+$("#homeBtn").onclick=()=>{ gemsUI(); show("home"); };
+
+$("#say").onclick=()=>{ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(Q.st.lines(Q.a,Q.b).join(" ")+" "+Q.st.q);
+  u.lang="he-IL"; u.rate=.85; const v=speechSynthesis.getVoices().find(v=>/^(he|iw)/i.test(v.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){} };
+
+/* ---------------- parents ---------------- */
+function renderStats(){
+  const L=S.log; if(!L.length){ $("#stats").textContent="עוד אין תשובות."; return; }
+  const right=L.filter(x=>x.v===x.ans).length, plus=L.filter(x=>x.op==="+"), minus=L.filter(x=>x.op==="-");
+  const pct=a=>a.length?Math.round(100*a.filter(x=>x.v===x.ans).length/a.length)+"%":"—";
+  $("#stats").innerHTML=`${L.length} תשובות, ${Math.round(100*right/L.length)}% נכונות. חיבור ${pct(plus)}, חיסור ${pct(minus)}.<br>טעויות אחרונות: `+
+    L.filter(x=>x.v!==x.ans).slice(-10).map(x=>`<span>${x.a} ${x.op==="-"?"−":"+"} ${x.b} → ${x.v}</span>`).join("");
+}
+$("#parentBtn").onclick=()=>{ $("#optDrag").checked=!!S.requireDrag; renderStats(); $("#resetBtn").textContent="איפוס התקדמות"; $("#parent").classList.add("on"); };
+$("#parentClose").onclick=()=>{ S.requireDrag=$("#optDrag").checked; save(); $("#parent").classList.remove("on"); };
+$("#resetBtn").onclick=e=>{ const b=e.currentTarget; if(b.dataset.sure){ S=blank(); save(); gemsUI(); $("#parent").classList.remove("on"); delete b.dataset.sure; return; } b.dataset.sure=1; b.textContent="בטוח? לחץ שוב"; };
+$("#fsBtn").onclick=()=>{ const d=document.documentElement; try{ (document.fullscreenElement?document.exitFullscreen():d.requestFullscreen()).catch(()=>{}); }catch(e){} };
+
+buildKbd(); gemsUI();
+if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}</script>
+</body>
+</html>
