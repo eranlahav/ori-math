@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#2b2118">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="manifest.webmanifest">
@@ -12,574 +12,377 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&display=swap">
 <style>
-:root{--bg:#2b2118;--wood:#8a5a2e;--wood2:#a06a2e;--ui:#c6c6c6;--ui2:#8b8b8b;--ui3:#555;--slot:#8b8b8b;--em:#3ad17a;--em2:#1f9d55;--gold:#ffcf4a;--red:#e2574c;--paper:#f6f1e4;--ink:#1d2340;--s:52px}
+/* One screen, top to bottom: story → what to do → the buckets (drag them) → the answer → a keyboard.
+   Minecraft feel from the pixel items and stone/wood panels; everything else is big and plain. */
+:root{--s:84px;--ui:#c6c6c6;--paper:#f6f1e4;--ink:#1d2340;--gold:#ffcf4a;--em:#3ad17a;--em2:#1f9d55}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;color:#fff;font-family:Rubik,'Noto Sans Hebrew',Arial,sans-serif;background:var(--bg)}
-body{background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),repeating-conic-gradient(from 0deg at 50% 50%,#6b4a2b 0 25%,#5e4026 0 50%) 0 0/56px 56px}
+html,body{margin:0;height:100%;overflow:hidden;color:#fff;font-family:Rubik,'Noto Sans Hebrew',Arial,sans-serif;background:#4a3320}
+body{background:linear-gradient(rgba(0,0,0,.35),rgba(0,0,0,.35)),repeating-conic-gradient(#6b4a2b 0 25%,#5e4026 0 50%) 0 0/56px 56px}
 button{font-family:inherit;cursor:pointer;border:0;color:inherit}
 svg{display:block;width:100%;height:100%}
 .screen{position:fixed;inset:0;display:none;flex-direction:column}
 .screen.on{display:flex}
-.top{display:flex;align-items:center;gap:12px;padding:10px 16px;flex:0 0 auto}
-.top h1{font-size:26px;margin:0;flex:1;text-shadow:3px 3px 0 #000}
-.blk{background:#6f6f6f;color:#fff;font-weight:700;font-size:20px;padding:10px 16px;border-radius:3px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.35),inset 4px 4px 0 rgba(255,255,255,.18),0 0 0 3px #000}
+.blk{background:#6f6f6f;color:#fff;font-weight:700;font-size:22px;padding:10px 16px;border-radius:3px;box-shadow:inset -4px -4px 0 rgba(0,0,0,.35),inset 4px 4px 0 rgba(255,255,255,.18),0 0 0 3px #000}
 .blk.green{background:var(--em2)}
-.blk.gold{background:#c9902a}
 .blk:active{transform:translateY(2px)}
-.gems{display:flex;align-items:center;gap:6px;font-size:24px;font-weight:800;text-shadow:2px 2px 0 #000}
-.gems i{width:30px;height:30px;display:block}
+.gems{display:flex;align-items:center;gap:6px;font-size:26px;font-weight:800;text-shadow:2px 2px 0 #000}
+.gems i{width:32px;height:32px;display:block}
+
 /* home */
-#home .hero{text-align:center;padding:6px 0 0}
-#home .hero h1{font-size:44px;margin:0;text-shadow:4px 4px 0 #000}
-#home .hero small{display:block;font-size:18px;opacity:.8;margin-top:2px;letter-spacing:1px}
-.cards{flex:1;display:flex;flex-wrap:wrap;gap:22px;justify-content:center;align-content:center;padding:10px 24px 24px;overflow:auto}
-.card{width:230px;height:270px;background:var(--ui);color:#222;border-radius:3px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 10px 12px;
-  box-shadow:inset -5px -5px 0 #555,inset 5px 5px 0 #fff,0 0 0 4px #000,0 10px 0 #0007}
-.card .art{width:110px;height:110px;image-rendering:pixelated}
-.card .ttl{font-size:30px;font-weight:800}
-.card .sub{font-size:17px;color:#444;text-align:center;min-height:22px}
-.card .score{display:flex;gap:4px}
-.card .score i{width:14px;height:14px;background:#777;display:block}
-.card .score i.on{background:var(--em2)}
-.card.locked{filter:grayscale(1) brightness(.6)}
-.card.locked::after{content:"🔒";position:absolute;top:8px;left:10px;font-size:28px}
-.card.book{background:#d9c08a}
-.card.book .sub{color:#5a4326}
-.corner{position:fixed;bottom:12px;left:12px;display:flex;gap:10px}
-.corner button{font-size:22px;padding:8px 12px}
+#home{align-items:center;justify-content:center;gap:28px}
+#home h1{font-size:52px;margin:0;text-shadow:4px 4px 0 #000;text-align:center}
+#home h1 small{display:block;font-size:20px;opacity:.75;letter-spacing:1px;margin-top:4px}
+#startBtn{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--ui);color:#222;padding:24px 56px 20px;border-radius:4px;font-size:40px;font-weight:800;
+  box-shadow:inset -6px -6px 0 #555,inset 6px 6px 0 #fff,0 0 0 4px #000,0 10px 0 #0007}
+#startBtn .art{width:140px;height:140px}
+#home .gems{position:fixed;top:14px;left:18px}
+#home .corner{position:fixed;bottom:14px;left:14px;display:flex;gap:10px}
+
 /* play */
-#play .mid{flex:1;display:flex;gap:16px;padding:0 16px;min-height:0}
-.story{flex:1.25;display:flex;flex-direction:column;gap:10px;min-width:0}
-.paper{background:var(--paper);color:var(--ink);border-radius:3px;padding:12px 18px;box-shadow:0 0 0 4px #000,inset -4px -4px 0 #d8ceb4;position:relative}
-#lines{font-size:30px;font-weight:700;line-height:1.45}
+.top{display:flex;align-items:center;gap:14px;padding:10px 16px 0}
+.top .sp{flex:1}
+.pips{display:flex;gap:6px}
+.pips i{width:18px;height:18px;background:#0007;display:block;box-shadow:0 0 0 2px #000}
+.pips i.on{background:var(--em)}.pips i.miss{background:#d88a2a}.pips i.cur{background:var(--gold)}
+.story{margin:10px 16px 0;background:var(--paper);color:var(--ink);border-radius:4px;padding:12px 22px 12px 70px;position:relative;box-shadow:0 0 0 4px #000,inset -5px -5px 0 #d8ceb4}
+#lines{font-size:34px;font-weight:700;line-height:1.45}
 #lines .q{color:#7a3d00}
-#say{position:absolute;top:8px;left:8px;font-size:24px;padding:4px 8px;background:#0001;border-radius:4px}
-.eqrow{display:flex;justify-content:center;align-items:center;gap:14px}
-#eq{direction:ltr;font-size:56px;font-weight:800;text-shadow:3px 3px 0 #000;display:flex;align-items:center;gap:14px;white-space:nowrap}
-#eq .box{min-width:92px;height:76px;background:var(--paper);color:var(--ink);text-shadow:none;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px #000,inset 0 0 0 3px var(--gold);padding:0 10px}
-#eq .box.good{box-shadow:0 0 0 4px #000,inset 0 0 0 4px var(--em)}
-#eq .box.bad{animation:shake .35s}
-#steps{direction:ltr;display:flex;justify-content:center;gap:16px;min-height:40px;font-size:28px;font-weight:800}
-#steps span{background:#0008;padding:2px 14px;border-radius:3px;box-shadow:0 0 0 2px #000}
-#steps span.ten{color:var(--gold)}
-#feedback{text-align:center;font-size:28px;font-weight:800;min-height:38px;text-shadow:2px 2px 0 #000}
-.pad{direction:ltr;display:grid;grid-template-columns:repeat(6,1fr);gap:8px;max-width:560px;margin:0 auto;width:100%}
-.pad button{height:60px;font-size:32px;font-weight:800;background:var(--ui);color:#222;border-radius:3px;box-shadow:inset -4px -4px 0 #555,inset 4px 4px 0 #fff,0 0 0 3px #000}
-.pad button:active{transform:translateY(2px)}
-.pad .ok{background:var(--em2);color:#fff;box-shadow:inset -4px -4px 0 #0005,inset 4px 4px 0 #fff4,0 0 0 3px #000}
-.pad .hint{background:#e8c25a}
-.pad.off{opacity:.4;pointer-events:none}
-#next{display:none;margin:0 auto;font-size:30px;padding:12px 34px}
-/* station */
-.station{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--ui);color:#333;border-radius:3px;box-shadow:inset -5px -5px 0 #555,inset 5px 5px 0 #fff,0 0 0 4px #000;padding:12px;min-width:0}
-.station h3{margin:0;font-size:22px;color:#3f3f3f}
-.craft{direction:ltr;display:flex;align-items:center;gap:16px}
-.grid3{display:grid;grid-template-columns:repeat(3,var(--g));gap:4px}
-.slot{width:var(--s);height:var(--s);background:var(--slot);box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff;position:relative;padding:5px}
-.grid3 .slot{width:var(--g);height:var(--g)}
-.slot .it{width:100%;height:100%}
-.slot .ghost{opacity:.28;filter:grayscale(1)}
-.slot .n{position:absolute;bottom:0;right:3px;font-size:calc(var(--s)*.38);font-weight:800;color:#fff;text-shadow:2px 2px 0 #3f3f3f;direction:ltr}
-.out{--g:calc(var(--s)*1.5)}
-.out .slot{width:calc(var(--g)*1.25);height:calc(var(--g)*1.25)}
-.out .slot .n{font-size:calc(var(--g)*.42)}
-.arrow{font-size:46px;color:#555}
-.event{width:min(200px,30vh);height:min(200px,30vh);image-rendering:pixelated}
-.station .cap{font-size:20px;font-weight:700;color:#444;text-align:center}
-/* inventory */
-.inv{flex:0 0 auto;margin:12px 16px 14px;background:var(--ui);border-radius:3px;box-shadow:inset -5px -5px 0 #555,inset 5px 5px 0 #fff,0 0 0 4px #000;padding:10px 14px;display:flex;align-items:center;gap:18px;justify-content:center}
-.rows{direction:ltr;display:flex;flex-direction:column;gap:6px}
-.row{display:flex;align-items:center;gap:3px}
-.row .gap{width:12px}
-.row .tag{width:calc(var(--s)*1.1);margin-left:10px;font-size:calc(var(--s)*.5);font-weight:800;color:var(--em2);text-align:center;opacity:0;transition:opacity .3s}
-.row.full .tag{opacity:1}
-.row.flash .slot{box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff,0 0 0 3px var(--gold)}
-.change{display:flex;flex-direction:column;align-items:center;gap:4px;color:#333;font-weight:700;font-size:18px}
-.change .slot{width:calc(var(--s)*1.3);height:calc(var(--s)*1.3)}
-.change .slot .n{font-size:calc(var(--s)*.5)}
-.change .n.plus{color:#7dff9f}.change .n.minus{color:#ffb0a8}
-.ppips{display:flex;gap:5px}
-.ppips i{width:16px;height:16px;background:#0007;display:block;box-shadow:0 0 0 2px #000}
-.ppips i.on{background:var(--em)}.ppips i.miss{background:#d88a2a}.ppips i.cur{background:var(--gold)}
-.fly{position:fixed;z-index:50;pointer-events:none;padding:5px}
-.pop{animation:pop .35s}
-@keyframes pop{50%{transform:scale(1.25)}}
+#say{position:absolute;top:50%;left:12px;transform:translateY(-50%);width:50px;height:50px;font-size:28px;background:#0000000f;border-radius:50%}
+.steps{display:flex;justify-content:center;gap:14px;margin:12px 16px 0}
+.step{display:flex;align-items:center;gap:10px;background:#0009;border-radius:30px;padding:6px 18px 6px 8px;font-size:24px;font-weight:700;opacity:.55;box-shadow:0 0 0 2px #000}
+.step b{width:36px;height:36px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-size:22px}
+.step.now{opacity:1;box-shadow:0 0 0 3px var(--gold)}
+.step.done{opacity:1}
+.step.done b{background:var(--em2);color:#fff}
+.dots{display:flex;gap:5px;margin-right:4px}
+.dots i{width:14px;height:14px;border-radius:50%;border:2px solid #fff;display:block}
+.dots i.on{background:var(--gold);border-color:var(--gold)}
+
+.play{flex:1;display:flex;gap:22px;justify-content:center;align-items:center;padding:8px 16px;min-height:0}
+.box{background:var(--ui);border-radius:4px;box-shadow:inset -5px -5px 0 #555,inset 5px 5px 0 #fff,0 0 0 4px #000;padding:10px 14px 14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.box h3{margin:0;font-size:22px;color:#333;display:flex;align-items:center;gap:8px}
+.frame{direction:ltr;display:grid;grid-template-columns:repeat(5,var(--s));gap:6px}
+.slot{width:var(--s);height:var(--s);background:#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff;position:relative;display:flex;align-items:center;justify-content:center}
+.zone{width:calc(var(--s)*4.3);min-height:calc(var(--s)*2 + 6px);border-radius:6px;display:flex;flex-wrap:wrap;align-content:center;justify-content:center;gap:6px;padding:8px;direction:ltr;max-width:calc(var(--s)*5 + 40px)}
+.zone.puddle{background:radial-gradient(ellipse at 50% 55%,#5aa0e6 0 45%,#3d78c4 46% 60%,#0000 61%),#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff}
+.zone.plain{background:#8b8b8b;box-shadow:inset 3px 3px 0 #373737,inset -3px -3px 0 #fff}
+.zone.hot,.frame.hot .slot{outline:4px dashed var(--gold);outline-offset:-4px}
+.who{width:46px;height:46px}
+.item{width:var(--s);height:var(--s);padding:7px;position:relative;touch-action:none;cursor:grab;border-radius:4px}
+.zone .item{background:#0002}
+.item.sel{background:#ffcf4a88;box-shadow:0 0 0 4px var(--gold)}
+.item.ghosted{opacity:.25}
+.item .num{position:absolute;top:-10px;right:-6px;background:var(--em2);color:#fff;font-size:22px;font-weight:800;min-width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #000;direction:ltr}
+.drag{position:fixed;z-index:60;pointer-events:none;width:var(--s);height:var(--s);padding:7px;filter:drop-shadow(4px 6px 0 #0006)}
+.hint{font-size:19px;color:#fff;text-shadow:2px 2px 0 #000;text-align:center;opacity:.85;margin-top:-2px}
+
+/* answer + keyboard */
+.answer{display:flex;align-items:center;justify-content:center;gap:24px;padding:2px 16px}
+#eq{direction:ltr;display:flex;align-items:center;gap:14px;font-size:54px;font-weight:800;text-shadow:3px 3px 0 #000}
+#field{min-width:120px;height:78px;background:#fff;color:var(--ink);text-shadow:none;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:54px;box-shadow:0 0 0 4px #000,inset 0 3px 6px #0003;position:relative}
+#field.active{box-shadow:0 0 0 4px #000,0 0 0 9px var(--gold),inset 0 3px 6px #0003}
+#field.active:not(.has)::after,#field.active.has::after{content:"";width:4px;height:52px;background:var(--ink);margin-left:4px;animation:blink 1s steps(1) infinite}
+#field.good{background:#d6ffe2;box-shadow:0 0 0 4px #000,0 0 0 9px var(--em)}
+#field.bad{animation:shake .35s}
+#msg{font-size:28px;font-weight:800;text-shadow:2px 2px 0 #000;min-width:260px;text-align:center}
+#next{font-size:30px;padding:12px 30px;display:none}
+.kbd{direction:ltr;margin:8px auto 14px;background:#2b2b30;border-radius:16px;padding:12px;display:grid;grid-template-columns:repeat(10,1fr) 1.3fr 2.2fr;gap:10px;width:min(1100px,calc(100vw - 32px));box-shadow:0 8px 0 #111,0 0 0 3px #000}
+.kbd button{height:74px;background:linear-gradient(#fbfbfb,#e4e4e8);color:#222;border-radius:10px;font-size:36px;font-weight:800;box-shadow:0 6px 0 #9a9aa2,0 7px 0 #000}
+.kbd button:active{transform:translateY(5px);box-shadow:0 1px 0 #9a9aa2,0 2px 0 #000}
+.kbd .bs{font-size:30px;background:linear-gradient(#e9e9ee,#cfcfd6)}
+.kbd .enter{background:linear-gradient(#3fcf7a,#22a05a);color:#fff;font-size:28px;box-shadow:0 6px 0 #146b3a,0 7px 0 #000}
+.kbd.off{opacity:.35;pointer-events:none}
+@keyframes blink{50%{opacity:0}}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-/* book */
-#bookGrid{flex:1;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-content:flex-start;padding:10px 20px 24px;overflow:auto;--s:38px}
-.rc{background:var(--ui);color:#333;border-radius:3px;box-shadow:inset -4px -4px 0 #555,inset 4px 4px 0 #fff,0 0 0 3px #000;padding:10px;display:flex;flex-direction:column;align-items:center;gap:8px;width:250px}
-.rc .craft{gap:8px}.rc .arrow{font-size:28px}
-.rc b{font-size:22px}
-.rc.locked .craft{filter:brightness(0) opacity(.35)}
-.rc.locked b{opacity:.5}
-/* overlays */
+@keyframes pop{50%{transform:scale(1.25)}}
+.pop{animation:pop .35s}
+
 #cele,#parent{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;z-index:80}
 #cele.on,#parent.on{display:flex}
-#cele .big{font-size:46px;font-weight:800;text-shadow:4px 4px 0 #000;text-align:center;line-height:1.4}
-#celeArt{width:160px;height:160px}
-#toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#000c;padding:10px 20px;border-radius:4px;font-size:24px;font-weight:800;display:none;z-index:60;align-items:center;gap:10px;box-shadow:0 0 0 3px var(--gold)}
-#toast i{width:40px;height:40px;display:block}
+#cele .big{font-size:48px;font-weight:800;text-shadow:4px 4px 0 #000;text-align:center;line-height:1.4}
+#celeArt{width:150px;height:150px}
 #parent .panel{background:#2d2d2d;border-radius:6px;padding:20px 24px;width:min(640px,92vw);max-height:90vh;overflow:auto;display:flex;flex-direction:column;gap:14px;box-shadow:0 0 0 4px #000}
 #parent label{display:flex;justify-content:space-between;align-items:center;font-size:20px;gap:12px}
 #parent input[type=checkbox]{width:28px;height:28px}
-#parent select{font-size:18px}
-#stats{font-size:17px;line-height:1.5;direction:rtl}
-#stats .miss{direction:ltr;display:inline-block;background:#0006;padding:0 6px;margin:2px;border-radius:3px}
-@media (orientation:portrait){
-  #play .mid{flex-direction:column}
-  .station{flex:0 0 auto}
-  .event{width:120px;height:120px}
-}
+#stats{font-size:17px;line-height:1.6}
+#stats span{direction:ltr;display:inline-block;background:#0006;padding:0 6px;margin:2px;border-radius:3px}
+@media (orientation:portrait){ .play{flex-direction:column;gap:12px} .kbd{grid-template-columns:repeat(5,1fr) ;} .kbd .bs,.kbd .enter{grid-column:span 5} .kbd button{height:64px} }
 </style>
 </head>
 <body>
 
-<!-- HOME -->
 <section id="home" class="screen on">
-  <div class="top"><div style="flex:1"></div><div class="gems"><i class="gemIcon"></i><span class="gemN">0</span></div></div>
-  <div class="hero"><h1>שֻׁלְחַן הָעֲבוֹדָה שֶׁל אוֹרִי</h1><small>Ori Math</small></div>
-  <div class="cards" id="cards"></div>
-  <div class="corner"><button class="blk" id="fsBtn" title="מסך מלא">⛶</button><button class="blk" id="parentBtn" title="להורים">⚙️</button></div>
+  <div class="gems"><i class="gemIcon"></i><span class="gemN">0</span></div>
+  <h1>הַדְּלָיִים שֶׁל אוֹרִי<small>Ori Math</small></h1>
+  <button id="startBtn"><div class="art" id="startArt"></div>שַׂחֵק</button>
+  <div class="corner"><button class="blk" id="fsBtn">⛶</button><button class="blk" id="parentBtn">⚙️</button></div>
 </section>
 
-<!-- PLAY -->
 <section id="play" class="screen">
   <div class="top">
     <button class="blk" id="homeBtn">🏠</button>
-    <h1 id="lvlTitle"></h1>
-    <div class="ppips" id="pips"></div>
+    <div class="pips" id="pips"></div>
+    <div class="sp"></div>
     <div class="gems"><i class="gemIcon"></i><span class="gemN">0</span></div>
   </div>
-  <div class="mid">
-    <div class="story">
-      <div class="paper"><div id="lines"></div><button id="say" title="הקראה">🔊</button></div>
-      <div class="eqrow"><div id="eq"></div></div>
-      <div id="steps"></div>
-      <div id="feedback"></div>
-      <div class="pad" id="pad"></div>
-      <button class="blk green" id="next">הַבָּא ◀</button>
-    </div>
-    <div class="station" id="station"></div>
+  <div class="story"><div id="lines"></div><button id="say" title="הקראה">🔊</button></div>
+  <div class="steps">
+    <div class="step" id="step1"><b>1</b><span id="step1t"></span><span class="dots" id="dots"></span></div>
+    <div class="step" id="step2"><b>2</b><span>כְּתֹב אֶת הַתְּשׁוּבָה</span></div>
   </div>
-  <div class="inv">
-    <div class="change" id="change"></div>
-    <div class="rows" id="rows"></div>
+  <div class="play">
+    <div class="box"><h3>הַמְּלַאי שֶׁלְּךָ</h3><div class="frame drop" data-z="inv" id="inv"></div></div>
+    <div class="box"><h3 id="zoneTitle"></h3><div class="zone drop" data-z="zone" id="zone"></div></div>
   </div>
+  <div class="hint">אֶפְשָׁר לִגְרֹר דְּלִי. אֶפְשָׁר גַּם לִגַּעַת בְּכַמָּה דְּלָיִים וְלִגְרֹר אוֹתָם בְּיַחַד.</div>
+  <div class="answer">
+    <div id="eq"></div>
+    <div id="msg"></div>
+    <button class="blk green" id="next">הַבָּא ◀</button>
+  </div>
+  <div class="kbd" id="kbd"></div>
 </section>
 
-<!-- RECIPE BOOK -->
-<section id="book" class="screen">
-  <div class="top"><button class="blk" id="bookHome">🏠</button><h1>סֵפֶר הַמַּתְכּוֹנִים</h1><div class="gems" id="bookCount"></div></div>
-  <div id="bookGrid"></div>
-</section>
-
-<div id="toast"></div>
 <div id="cele"><div id="celeArt"></div><div class="big" id="celeText"></div><button class="blk green" id="celeOk" style="font-size:30px;padding:14px 34px">יֵשׁ!</button></div>
 <div id="parent"><div class="panel">
   <h2 style="margin:0">להורים</h2>
-  <label>לפתוח את כל השלבים <input type="checkbox" id="optUnlock"></label>
-  <label>מהירות האנימציה
-    <select id="optSpeed"><option value="1">רגילה</option><option value="1.6">איטית</option><option value="0.6">מהירה</option></select></label>
-  <label>אנימציה אחרי כל תשובה נכונה <input type="checkbox" id="optAfter"></label>
+  <label>חובה להזיז את הדליים לפני שכותבים <input type="checkbox" id="optDrag"></label>
   <div id="stats"></div>
   <div style="display:flex;gap:12px;justify-content:space-between">
     <button class="blk" id="resetBtn" style="background:#8a2b2b">איפוס התקדמות</button>
     <button class="blk green" id="parentClose">סגור</button>
   </div>
-  <div style="font-size:14px;opacity:.7">נשמר במכשיר בלבד (ori.math.v1). לא נוגע באפליקציות הקריאה והכתיבה.</div>
+  <div style="font-size:14px;opacity:.7">נשמר במכשיר בלבד (ori.math.v2).</div>
 </div></div>
 
 <script src="items.js"></script>
 <script>
-"use strict";
-/* =====================================================================
-   DATA. Everything Ori reads is here, with full nikud.
-   Numbers are shown as digits, so Hebrew number agreement never comes up.
-   ===================================================================== */
+"use strict";{
+/* ---------------- content (full nikud; numbers as digits) ---------------- */
+// Each story: op, what the side box is, where buckets go, and the words.
+const STORIES = [
+  {op:"-", zone:"שְׁלוּלִית", who:"water", puddle:true, gone:"bucket",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `אוֹי! ${b} נִשְׁפְּכוּ.`], q:"כַּמָּה דְּלָיֵי מַיִם נִשְׁאֲרוּ?",
+   todo:(b)=>`גְּרֹר ${b} דְּלָיִים לַשְּׁלוּלִית`},
+  {op:"-", zone:"הַכַּפְרִי", who:"villager",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `נָתַתָּ לַכַּפְרִי ${b}.`], q:"כַּמָּה דְּלָיִים נִשְׁאֲרוּ לְךָ?",
+   todo:(b)=>`גְּרֹר ${b} דְּלָיִים לַכַּפְרִי`},
+  {op:"+", zone:"תֵּבָה", who:"chest",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `בַּתֵּבָה מָצָאתָ עוֹד ${b}.`], q:"כַּמָּה דְּלָיִים יֵשׁ לְךָ עַכְשָׁו?",
+   todo:()=>`גְּרֹר אֶת הַדְּלָיִים מֵהַתֵּבָה לַמְּלַאי`},
+  {op:"+", zone:"צָ׳ארְלִי", who:"dog",
+   lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `צָ׳ארְלִי הֵבִיא לְךָ עוֹד ${b}.`], q:"כַּמָּה דְּלָיִים יֵשׁ לְךָ עַכְשָׁו?",
+   todo:()=>`גְּרֹר אֶת הַדְּלָיִים שֶׁל צָ׳ארְלִי לַמְּלַאי`},
+];
+const ROUND=8, MAX=10;
 
-// Inventory items: plural name (kid-style Minecraft Hebrew) and the verb for getting more.
-const NAMES = {
-  cobble:{p:"אֲבָנִים", get:"חָפַרְתָּ"}, coal:{p:"פֶּחָם", get:"חָפַרְתָּ"}, iron:{p:"בַּרְזֶל", get:"חָפַרְתָּ"},
-  gold:{p:"זָהָב", get:"חָפַרְתָּ"}, diamond:{p:"דַּיְמוֹנְדִּים", get:"חָפַרְתָּ"}, sand:{p:"חוֹל", get:"חָפַרְתָּ"},
-  log:{p:"בּוּלֵי עֵץ", get:"כָּרַתָּ"}, apple:{p:"תַּפּוּחִים", get:"קָטַפְתָּ"}, wheat:{p:"חִטָּה", get:"קָצַרְתָּ"},
-  potato:{p:"תַּפּוּדִים", get:"אָסַפְתָּ"}, emerald:{p:"אֶמֶרַלְדִּים"}, bone:{p:"עֲצָמוֹת"}, arrow:{p:"חִצִּים"},
-  planks:{p:"קְרָשִׁים"}, stick:{p:"מַקְלוֹת"}, torch:{p:"לַפִּידִים"}, ladder:{p:"סֻלָּמוֹת"}, door:{p:"דְּלָתוֹת"},
-  water:{p:"דְּלָיֵי מַיִם"}, string:{p:"חוּטִים"}, bread:{p:"לֶחֶם"},
-};
-
-// Real crafting recipes (3x3 grid, read row by row; "." = empty).
-// use = the ingredient that comes out of Ori's inventory in "how many are left?" exercises.
-// from = how it is made, for "you made N more" exercises.
-const RECIPES = {
-  planks: {name:"קְרָשִׁים",      grid:"....L....", key:{L:"log"},  out:"planks", n:4, from:"מִבּוּל עֵץ אֶחָד"},
-  sticks: {name:"מַקְלוֹת",       grid:".P..P....", key:{P:"planks"}, out:"stick", n:4, use:"planks", obj:"4 מַקְלוֹת", from:"מִ־2 קְרָשִׁים"},
-  table:  {name:"שֻׁלְחַן עֲבוֹדָה", grid:"PP.PP....", key:{P:"planks"}, out:"table", n:1, use:"planks", obj:"שֻׁלְחַן עֲבוֹדָה"},
-  torch:  {name:"לַפִּידִים",     grid:".C..S....", key:{C:"coal",S:"stick"}, out:"torch", n:4, from:"מִפֶּחָם וּמַקֵּל"},
-  chest:  {name:"תֵּבָה",         grid:"PPPP.PPPP", key:{P:"planks"}, out:"chest", n:1, use:"planks", obj:"תֵּבָה"},
-  furnace:{name:"תַּנּוּר",       grid:"CCCC.CCCC", key:{C:"cobble"}, out:"furnace", n:1, use:"cobble", obj:"תַּנּוּר"},
-  bread:  {name:"לֶחֶם",          grid:"...WWW...", key:{W:"wheat"}, out:"bread", n:1, use:"wheat", obj:"לֶחֶם"},
-  bucket: {name:"דְּלִי",          grid:"...I.I.I.", key:{I:"iron"}, out:"bucket", n:1, use:"iron", obj:"דְּלִי"},
-  pickaxe:{name:"פִּיקְאַקְס",     grid:"III.S..S.", key:{I:"iron",S:"stick"}, out:"pickaxe", n:1, use:"iron", obj:"פִּיקְאַקְס"},
-  sword:  {name:"חֶרֶב",          grid:".I..I..S.", key:{I:"iron",S:"stick"}, out:"sword", n:1, use:"iron", obj:"חֶרֶב"},
-  ladder: {name:"סֻלָּמוֹת",       grid:"S.SSSSS.S", key:{S:"stick"}, out:"ladder", n:3, use:"stick", obj:"3 סֻלָּמוֹת", from:"מִ־7 מַקְלוֹת"},
-  boat:   {name:"סִירָה",         grid:"...P.PPPP", key:{P:"planks"}, out:"boatw", n:1, use:"planks", obj:"סִירָה"},
-  door:   {name:"דְּלָתוֹת",       grid:"PP.PP.PP.", key:{P:"planks"}, out:"door", n:3, use:"planks", obj:"3 דְּלָתוֹת", from:"מִ־6 קְרָשִׁים"},
-  bow:    {name:"קֶשֶׁת",          grid:".SFS.F.SF", key:{S:"stick",F:"string"}, out:"bow", n:1, use:"string", obj:"קֶשֶׁת"},
-  gapple: {name:"תַּפּוּחַ זָהָב",   grid:"GGGGAGGGG", key:{G:"gold",A:"apple"}, out:"gapple", n:1, use:"gold", obj:"תַּפּוּחַ זָהָב"},
-};
-const RECIPE_ORDER = ["planks","sticks","table","torch","chest","furnace","bread","bucket","pickaxe","sword","ladder","boat","door","bow","gapple"];
-const useCount = r => [...r.grid].filter(c => r.key[c] === r.use).length;
-
-const LEVELS = {
-  1:{name:"עַד 10", sub:"חִבּוּר וְחִסּוּר", rows:1, art:"planks"},
-  2:{name:"עַד 20", sub:"בְּלִי לַעֲבֹר אֶת הָ־10", rows:2, art:"chest"},
-  3:{name:"מֵעַל 10", sub:"מְמַלְּאִים 10 וּמַמְשִׁיכִים", rows:2, art:"diamond"},
-};
-const ROUND = 8;
-
-// Which (a, b) pairs a level allows.
-function pairOk(lvl, op, a, b){
-  if(op==="fill") return (lvl===1||lvl===3) && a>=1 && a<=9 && b===10-a;
-  if(op==="+"){ const s=a+b;
-    if(lvl===1) return a>=1 && b>=1 && s<=10;
-    if(lvl===2) return a>=10 && b>=1 && (a%10)+b<=9;              // 13 + 4: stays inside the second ten
-    if(lvl===3) return a>=2 && a<=9 && b>=2 && b<=9 && s>=11;      // 8 + 5: fill the ten, then go on
-  } else { const d=a-b;
-    if(lvl===1) return a>=2 && a<=10 && b>=1 && d>=1;
-    if(lvl===2) return a>=11 && a<=20 && b>=1 && d>=10;            // 17 - 5: stays above 10
-    if(lvl===3) return a>=11 && a<=18 && b>=2 && b<=9 && d>=1 && d<=9; // 14 - 6: back to 10, then below
-  }
-  return false;
-}
-
-// Exercise templates. kind: "event" (a big picture does it) or "craft" (the crafting table does it).
-const MINE = ["cobble","iron","gold","diamond","log","apple","wheat","potato"];
-const TEMPLATES = [];
-MINE.forEach(id => TEMPLATES.push({op:"+", kind:"event", item:id, icon:id==="log"?"log":id==="apple"||id==="wheat"||id==="potato"?id:"pickaxe",
-  cap: NAMES[id].get==="חָפַרְתָּ" ? "חוֹפְרִים בַּמִּכְרֶה" : "אוֹסְפִים",
-  lines:(a,b)=>[`יֵשׁ לְךָ ${a} ${NAMES[id].p}.`, `${NAMES[id].get} עוֹד ${b}.`], q:"כַּמָּה יֵשׁ לְךָ עַכְשָׁו?"}));
-TEMPLATES.push(
-  {op:"+", kind:"event", item:"bone", icon:"dog", cap:"צָ׳ארְלִי", lines:(a,b)=>[`צָ׳ארְלִי הֵבִיא לְךָ ${a} עֲצָמוֹת.`, `אַחַר כָּךְ הוּא הֵבִיא עוֹד ${b}.`], q:"כַּמָּה עֲצָמוֹת יֵשׁ לְךָ?"},
-  {op:"+", kind:"event", item:"arrow", icon:"bow", cap:"סְקֶלֶטוֹן יוֹרֶה", lines:(a,b)=>[`יֵשׁ לְךָ ${a} חִצִּים.`, `סְקֶלֶטוֹן יָרָה ${b} חִצִּים, וְאָסַפְתָּ אוֹתָם.`], q:"כַּמָּה חִצִּים יֵשׁ לְךָ?"},
-  {op:"+", kind:"event", item:"emerald", icon:"villager", cap:"הַכַּפְרִי", lines:(a,b)=>[`יֵשׁ לְךָ ${a} אֶמֶרַלְדִּים.`, `מָכַרְתָּ חִטָּה לַכַּפְרִי, וְהוּא נָתַן לְךָ ${b}.`], q:"כַּמָּה אֶמֶרַלְדִּים יֵשׁ לְךָ?"},
-  {op:"-", kind:"event", item:"water", icon:"water", cap:"אוֹי! נִשְׁפָּךְ", spill:true, lines:(a,b)=>[`יֵשׁ לְךָ ${a} דְּלָיֵי מַיִם.`, `אוֹי! ${b} נִשְׁפְּכוּ.`], q:"כַּמָּה נִשְׁאֲרוּ?"},
-  {op:"-", kind:"event", item:"cobble", icon:"creeper", cap:"קְרִיפֶּר!", burst:true, lines:(a,b)=>[`יֵשׁ לְךָ ${a} אֲבָנִים.`, `קְרִיפֶּר הִתְפּוֹצֵץ, וְ־${b} אֲבָנִים עָפוּ!`], q:"כַּמָּה נִשְׁאֲרוּ?"},
-  {op:"-", kind:"event", item:"bone", icon:"dog", cap:"צָ׳ארְלִי", lines:(a,b)=>[`יֵשׁ לְךָ ${a} עֲצָמוֹת.`, `נָתַתָּ לְצָ׳ארְלִי ${b}.`], q:"כַּמָּה נִשְׁאֲרוּ?"},
-  {op:"-", kind:"event", item:"emerald", icon:"villager", cap:"הַכַּפְרִי", lines:(a,b)=>[`יֵשׁ לְךָ ${a} אֶמֶרַלְדִּים.`, `שִׁלַּמְתָּ לַכַּפְרִי ${b} אֶמֶרַלְדִּים.`], q:"כַּמָּה נִשְׁאֲרוּ?"},
-);
-// "You made N more": the recipe decides how many (4 planks from a log, 4 torches, 3 ladders...)
-["planks","sticks","torch","ladder","door"].forEach(rid => { const r=RECIPES[rid];
-  TEMPLATES.push({op:"+", kind:"craft", recipe:rid, make:true, item:r.out, b:r.n,
-    lines:(a,b)=>[`יֵשׁ לְךָ ${a} ${NAMES[r.out].p}.`, `הֵכַנְתָּ עוֹד ${b} ${r.from}.`], q:"כַּמָּה יֵשׁ לְךָ עַכְשָׁו?"}); });
-// "How many are left?": the recipe uses up a fixed amount (crafting table = 4 planks, chest = 8...)
-Object.keys(RECIPES).forEach(rid => { const r=RECIPES[rid]; if(!r.use) return;
-  TEMPLATES.push({op:"-", kind:"craft", recipe:rid, item:r.use, b:useCount(r),
-    lines:(a,b)=>[`יֵשׁ לְךָ ${a} ${NAMES[r.use].p}.`, `הֵכַנְתָּ ${r.obj} מִ־${b} ${NAMES[r.use].p}.`], q:"כַּמָּה נִשְׁאֲרוּ?"}); });
-// Make-a-ten warm-up (levels 1 and 3)
-["planks","cobble","emerald","torch","apple"].forEach(id => TEMPLATES.push({op:"fill", kind:"event", item:id, icon:"chest", cap:"מְמַלְּאִים שׁוּרָה",
-  lines:(a)=>[`בַּשּׁוּרָה יֵשׁ 10 מְקוֹמוֹת.`, `יֵשׁ בָּהּ ${a} ${NAMES[id].p}.`], q:"כַּמָּה חֲסֵרִים כְּדֵי לְמַלֵּא אֶת הַשּׁוּרָה?"}));
-
-/* ===================== storage ===================== */
-const KEY="ori.math.v1";
-const blank=()=>({gems:0, best:{}, done:{}, recipes:{}, log:[], unlockAll:false, speed:1, animAfter:true});
+/* ---------------- storage ---------------- */
+const KEY="ori.math.v2";
+const blank=()=>({gems:0, log:[], requireDrag:true});
 let S; try{ S=Object.assign(blank(), JSON.parse(localStorage.getItem(KEY)||"{}")); }catch(e){ S=blank(); }
 const save=()=>{ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} };
-const unlocked=l=> l===1 || S.unlockAll || !!S.done[l-1];
 
-/* ===================== helpers ===================== */
+/* ---------------- helpers ---------------- */
 const $=s=>document.querySelector(s);
 const rnd=n=>Math.floor(Math.random()*n);
-const pick=arr=>arr[rnd(arr.length)];
-const sleep=ms=>new Promise(r=>setTimeout(r, ms*(S.speed||1)));
-const icon=id=>`<div class="it">${ITEMS[id]||""}</div>`;
+const pick=a=>a[rnd(a.length)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 document.querySelectorAll(".gemIcon").forEach(e=>e.innerHTML=ITEMS.emerald);
-function gemsUI(){ document.querySelectorAll(".gemN").forEach(e=>e.textContent=S.gems); }
-function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on", s.id===id)); }
-function toast(html, ms=1800){ const t=$("#toast"); t.innerHTML=html; t.style.display="flex"; clearTimeout(toast.t); toast.t=setTimeout(()=>t.style.display="none", ms); }
+$("#startArt").innerHTML=ITEMS.water;
+const gemsUI=()=>document.querySelectorAll(".gemN").forEach(e=>e.textContent=S.gems);
+const show=id=>document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
+function sizeUI(){ const W=innerWidth,H=innerHeight;
+  const s = H>W ? Math.min(90,(W-90)/5.6, H*0.07) : Math.min(92,(W-120)/11.2, H*0.105);
+  document.documentElement.style.setProperty("--s", Math.max(48,s)+"px"); }
+addEventListener("resize",sizeUI); sizeUI();
 
-function sizeUI(){
-  const W=innerWidth, H=innerHeight;
-  const s=Math.max(34, Math.min(64, (W-200)/12.2, H*(H>W?0.055:0.075)));
-  document.documentElement.style.setProperty("--s", s+"px");
-}
-addEventListener("resize", sizeUI); sizeUI();
-
-/* ===================== home ===================== */
-function renderHome(){
-  gemsUI();
-  const c=$("#cards"); c.innerHTML="";
-  [1,2,3].forEach(l=>{ const L=LEVELS[l], ok=unlocked(l), best=S.best[l]||0;
-    const d=document.createElement("button"); d.className="card"+(ok?"":" locked");
-    d.innerHTML=`<div class="art">${ITEMS[L.art]}</div><div class="ttl">${L.name}</div><div class="sub">${L.sub}</div>
-      <div class="score">${Array.from({length:ROUND},(_, i)=>`<i class="${i<best?"on":""}"></i>`).join("")}</div>`;
-    d.onclick=()=>{ if(ok) startRound(l); else toast("🔒 קֹדֶם מְסַיְּמִים אֶת הַשָּׁלָב הַקּוֹדֵם"); };
-    c.appendChild(d); });
-  const n=Object.keys(S.recipes).length;
-  const b=document.createElement("button"); b.className="card book";
-  b.innerHTML=`<div class="art">${ITEMS.recipe}</div><div class="ttl">מַתְכּוֹנִים</div><div class="sub">${n} / ${RECIPE_ORDER.length}</div><div></div>`;
-  b.onclick=renderBook; c.appendChild(b);
-}
-
-/* ===================== recipe book ===================== */
-function craftHTML(rid, opts={}){ const r=RECIPES[rid];
-  const cells=[...r.grid].map((ch,i)=>{ const id=r.key[ch];
-    if(!id) return `<div class="slot" data-i="${i}"></div>`;
-    const ghost = opts.ghostUse && id===r.use;
-    return `<div class="slot" data-i="${i}" data-id="${id}">${ghost?`<div class="it ghost">${ITEMS[id]}</div>`:(opts.emptyAll?"":icon(id))}</div>`; }).join("");
-  return `<div class="craft" style="--g:${opts.g||"var(--s)"}"><div class="grid3">${cells}</div><div class="arrow">➜</div>
-    <div class="out"><div class="slot" id="${opts.outId||""}">${opts.hideOut?"":icon(r.out)+(r.n>1?`<span class="n">${r.n}</span>`:"")}</div></div></div>`;
-}
-function renderBook(){
-  const g=$("#bookGrid"); g.innerHTML="";
-  RECIPE_ORDER.forEach(rid=>{ const has=!!S.recipes[rid];
-    const d=document.createElement("div"); d.className="rc"+(has?"":" locked");
-    d.innerHTML=craftHTML(rid)+`<b>${has?RECIPES[rid].name:"?"}</b>`; g.appendChild(d); });
-  $("#bookCount").textContent=`${Object.keys(S.recipes).length} / ${RECIPE_ORDER.length}`;
-  show("book");
-}
-$("#bookHome").onclick=()=>{ renderHome(); show("home"); };
-
-/* ===================== round ===================== */
-let R=null, Q=null, busy=false;
-
-function makeQuestion(lvl, avoid){
-  for(let tries=0; tries<200; tries++){
-    // weights: fill is a short warm-up, recipes are the heart of it
-    let pool=TEMPLATES.filter(t=> t.op!=="fill" || lvl!==2);
-    const want = Math.random()<0.5 ? "craft" : "event";
-    let t=pick(pool.filter(x=>x.kind===want));
-    if(t.op==="fill" && Math.random()<0.6) continue;
-    const pairs=[];
-    for(let a=0;a<=20;a++) for(let b=1;b<=20;b++){
-      if(t.b && b!==t.b) continue;
-      if(t.op==="fill" ? pairOk(lvl,"fill",a,b) : pairOk(lvl,t.op,a,b)) pairs.push([a,b]);
-    }
-    if(!pairs.length) continue;
-    const [a,b]=pick(pairs);
-    if(avoid && avoid.some(q=>q.t===t || (q.a===a && q.b===b && q.t.op===t.op))) continue;
-    const ans = t.op==="+"? a+b : t.op==="-"? a-b : b;
-    return {t, a, b, ans, lvl};
+/* ---------------- round ---------------- */
+let R, Q;
+function newQuestion(prev){
+  for(let i=0;i<100;i++){
+    const st=pick(STORIES); let a,b;
+    if(st.op==="-"){ a=3+rnd(MAX-2); b=1+rnd(a-1); } else { a=1+rnd(MAX-2); b=1+rnd(Math.min(6,MAX-a)); }
+    if(prev && prev.a===a && prev.b===b) continue;
+    if(prev && prev.st===st && Math.random()<.7) continue;
+    return {st,a,b,ans:st.op==="-"?a-b:a+b};
   }
 }
+function startRound(){ R={i:0, qs:[], res:[]}; let p=null; for(let i=0;i<ROUND;i++){ p=newQuestion(p); R.qs.push(p); } show("play"); sizeUI(); loadQ(); }
+function pipsUI(){ $("#pips").innerHTML=R.qs.map((_,i)=>`<i class="${i<R.res.length?(R.res[i]?"on":"miss"):i===R.i?"cur":""}"></i>`).join(""); }
 
-function startRound(lvl){
-  R={lvl, i:0, qs:[], results:[]};
-  for(let i=0;i<ROUND;i++) R.qs.push(makeQuestion(lvl, R.qs.slice(-3)));
-  // at least one make-a-ten warm-up first in level 3
-  if(lvl===3){ const f=TEMPLATES.filter(t=>t.op==="fill"); const t=pick(f); const a=2+rnd(7); R.qs[0]={t,a,b:10-a,ans:10-a,lvl}; }
-  $("#lvlTitle").textContent=LEVELS[lvl].name;
-  show("play"); sizeUI(); loadQuestion();
+function loadQ(){
+  const q=R.qs[R.i];
+  Q=Object.assign({},q,{typed:"",tries:0,done:false,t0:Date.now(),sel:new Set()});
+  const st=Q.st;
+  // items: k = id, z = "inv" | "zone"
+  Q.items=[]; for(let k=0;k<Q.a;k++) Q.items.push({k,z:"inv"});
+  if(st.op==="+") for(let k=0;k<Q.b;k++) Q.items.push({k:Q.a+k,z:"zone"});
+  $("#lines").innerHTML=st.lines(Q.a,Q.b).map(l=>`<div>${l}</div>`).join("")+`<div class="q">${st.q}</div>`;
+  $("#step1t").textContent=st.todo(Q.b);
+  $("#zoneTitle").innerHTML=`<span class="who">${ITEMS[st.who]}</span>${st.zone}`;
+  $("#zone").className="zone drop "+(st.puddle?"puddle":"plain");
+  $("#msg").textContent=""; $("#next").style.display="none"; $("#msg").style.display="";
+  pipsUI(); gemsUI(); render(); fieldUI();
 }
 
-function pipsUI(){ $("#pips").innerHTML=R.qs.map((_,i)=>`<i class="${i<R.results.length?(R.results[i]?"on":"miss"):i===R.i?"cur":""}"></i>`).join(""); }
+const inZone=()=>Q.items.filter(i=>i.z==="zone").length;
+const moveDone=()=> Q.st.op==="-" ? inZone()===Q.b : inZone()===0;
 
-function loadQuestion(){
-  Q=Object.assign({}, R.qs[R.i], {typed:"", tries:0, hinted:false, animated:false, t0:Date.now()});
-  const t=Q.t; Q.bridge = t.op!=="fill" && ((t.op==="+" && Q.a<10 && Q.a+Q.b>10) || (t.op==="-" && Q.a>10 && Q.a-Q.b<10));
-  pipsUI(); gemsUI();
-  $("#lines").innerHTML=t.lines(Q.a,Q.b).map(l=>`<div>${l}</div>`).join("")+`<div class="q">${t.q}</div>`;
-  $("#feedback").textContent=""; $("#steps").innerHTML="";
-  $("#next").style.display="none"; $("#pad").style.display=""; $("#pad").classList.remove("off");
-  renderStation(); renderInventory(); renderChange(); eqUI();
+function itemHTML(it){
+  const id = it.z==="zone" && Q.st.gone ? Q.st.gone : "water";
+  return `<div class="item${Q.sel.has(it.k)?" sel":""}" data-k="${it.k}">${ITEMS[id]}</div>`;
+}
+function render(){
+  const inv=Q.items.filter(i=>i.z==="inv"), zn=Q.items.filter(i=>i.z==="zone");
+  $("#inv").innerHTML=Array.from({length:MAX},(_,i)=>`<div class="slot">${inv[i]?itemHTML(inv[i]):""}</div>`).join("");
+  $("#zone").innerHTML=zn.map(itemHTML).join("");
+  // step 1 progress
+  const need = Q.st.op==="-" ? Q.b : Q.b, have = Q.st.op==="-" ? zn.length : Q.b-zn.length;
+  $("#dots").innerHTML=Array.from({length:need},(_,i)=>`<i class="${i<have?"on":""}"></i>`).join("");
+  const ok=moveDone();
+  $("#step1").className="step "+(ok?"done":"now");
+  $("#step2").className="step "+(Q.done?"done":ok?"now":"");
+  $("#kbd").classList.toggle("off", Q.done || (S.requireDrag && !ok));
+  fieldUI();
+  if(!ok && Q.st.op==="-" && zn.length>Q.b) $("#msg").textContent=`צָרִיךְ רַק ${Q.b}. הַחְזֵר אֶחָד.`;
+  else if(!Q.done && !Q.tries) $("#msg").textContent = ok ? "עַכְשָׁו כְּתֹב בַּמִּקְלֶדֶת" : "";
+}
+function fieldUI(final){
+  const st=Q.st, active=!Q.done && (!S.requireDrag || moveDone());
+  const val = final!==undefined ? final : Q.typed;
+  $("#eq").innerHTML=`<span>${Q.a}</span><span>${st.op==="-"?"−":"+"}</span><span>${Q.b}</span><span>=</span>
+    <span id="field" class="${active?"active":""} ${val!==""?"has":""} ${Q.done?"good":""}">${val}</span>`;
 }
 
-function eqUI(final){
-  const t=Q.t, box=`<span class="box ${final?"good":""}" id="ansBox">${final?Q.ans:(Q.typed||"?")}</span>`;
-  $("#eq").innerHTML = t.op==="fill" ? `<span>${Q.a}</span><span>+</span>${box}<span>=</span><span>10</span>`
-    : `<span>${Q.a}</span><span>${t.op==="+"?"+":"−"}</span><span>${Q.b}</span><span>=</span>${box}`;
+/* ---------------- drag, tap-to-select, tap-to-move ---------------- */
+let P=null;
+function cap(z){ return z==="inv"? MAX : MAX; }
+function moveTo(keys, z){
+  const room = cap(z) - Q.items.filter(i=>i.z===z).length;
+  let moved=0;
+  Q.items.forEach(it=>{ if(keys.includes(it.k) && it.z!==z && moved<room){ it.z=z; moved++; } });
+  // keep zone items in the order they arrived
+  Q.items.sort((x,y)=>0);
+  Q.sel.clear(); render();
 }
-
-/* ---------- station (crafting table or event picture) ---------- */
-function renderStation(){
-  const t=Q.t, st=$("#station");
-  if(t.kind==="craft"){
-    const r=RECIPES[t.recipe];
-    st.innerHTML=`<h3>שֻׁלְחַן עֲבוֹדָה · ${r.name}</h3>`+
-      craftHTML(t.recipe, {g:"calc(var(--s)*1.3)", ghostUse:!t.make, hideOut:true, outId:"outSlot"})+
-      `<div class="cap">${t.make?`מַתְכּוֹן: ${r.n} ${NAMES[r.out].p}`:`צָרִיךְ ${Q.b} ${NAMES[r.use].p}`}</div>`;
-    if(t.make){ const o=$("#outSlot"); o.innerHTML=`<div class="it ghost">${ITEMS[r.out]}</div><span class="n">${r.n}</span>`; }
+function dropAt(x,y){ const el=document.elementFromPoint(x,y); const d=el && el.closest(".drop"); return d? d.dataset.z : null; }
+document.addEventListener("pointerdown",e=>{
+  if(!$("#play").classList.contains("on") || Q.done) return;
+  const itEl=e.target.closest(".item");
+  if(itEl){ P={k:+itEl.dataset.k, x:e.clientX, y:e.clientY, drag:false, el:itEl}; e.preventDefault(); return; }
+  const d=e.target.closest(".drop");
+  if(d && Q.sel.size){ moveTo([...Q.sel], d.dataset.z); }
+});
+document.addEventListener("pointermove",e=>{
+  if(!P) return;
+  if(!P.drag && Math.hypot(e.clientX-P.x,e.clientY-P.y)>10){
+    P.drag=true;
+    P.keys = Q.sel.has(P.k) ? [...Q.sel] : [P.k];
+    P.ghosts = P.keys.map((k,i)=>{ const g=document.createElement("div"); g.className="drag"; g.innerHTML=ITEMS.water; document.body.appendChild(g); return g; });
+    P.keys.forEach(k=>{ const el=document.querySelector(`.item[data-k="${k}"]`); el && el.classList.add("ghosted"); });
+  }
+  if(P.drag){
+    const s=parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--s"));
+    P.ghosts.forEach((g,i)=>{ g.style.left=(e.clientX-s/2+i*s*0.28)+"px"; g.style.top=(e.clientY-s/2-i*s*0.12)+"px"; });
+    const z=dropAt(e.clientX,e.clientY);
+    $("#inv").classList.toggle("hot", z==="inv"); $("#zone").classList.toggle("hot", z==="zone");
+  }
+});
+function endPointer(e){
+  if(!P) return;
+  if(P.drag){
+    P.ghosts.forEach(g=>g.remove()); $("#inv").classList.remove("hot"); $("#zone").classList.remove("hot");
+    const z=dropAt(e.clientX,e.clientY);
+    if(z) moveTo(P.keys, z); else render();
   } else {
-    st.innerHTML=`<div class="event" id="evIcon">${ITEMS[t.icon]}</div><div class="cap">${t.cap}</div>`;
+    Q.sel.has(P.k) ? Q.sel.delete(P.k) : Q.sel.add(P.k); render();
   }
+  P=null;
 }
+document.addEventListener("pointerup",endPointer);
+document.addEventListener("pointercancel",e=>{ if(P&&P.ghosts) P.ghosts.forEach(g=>g.remove()); P=null; render(); });
 
-/* ---------- inventory: rows of 10 (5 + 5), like a ten-frame ---------- */
-let slots=[];
-function renderInventory(){
-  const rows=LEVELS[Q.lvl].rows, el=$("#rows"); el.innerHTML=""; slots=[];
-  for(let r=0;r<rows;r++){ const row=document.createElement("div"); row.className="row";
-    for(let i=0;i<10;i++){ if(i===5){ const g=document.createElement("div"); g.className="gap"; row.appendChild(g); }
-      const s=document.createElement("div"); s.className="slot"; row.appendChild(s); slots.push(s); }
-    const tag=document.createElement("div"); tag.className="tag"; tag.textContent="10"; row.appendChild(tag);
-    el.appendChild(row); }
-  setCount(Q.a);
+/* ---------------- keyboard ---------------- */
+function buildKbd(){
+  const k=$("#kbd"); k.innerHTML="";
+  const add=(t,c,fn)=>{ const b=document.createElement("button"); b.innerHTML=t; if(c) b.className=c; b.onclick=fn; k.appendChild(b); };
+  [1,2,3,4,5,6,7,8,9,0].forEach(n=>add(n,"",()=>typeKey(String(n))));
+  add("⌫","bs",()=>typeKey("bs"));
+  add("בְּדִיקָה ↵","enter",()=>typeKey("enter"));
 }
-function setCount(n){ slots.forEach((s,i)=>s.innerHTML= i<n? icon(Q.t.item):""); rowsFull(); }
-function rowsFull(){ document.querySelectorAll("#rows .row").forEach((row,r)=>{ const full=[...row.querySelectorAll(".slot")].every(s=>s.innerHTML); row.classList.toggle("full", full); }); }
-function renderChange(left){
-  const t=Q.t, el=$("#change");
-  if(left===undefined) left = t.op==="fill" ? null : Q.b;
-  const sign = t.op==="-" ? "−" : "+";
-  const label = t.op==="fill" ? "חָסֵר" : t.op==="+" ? "מוֹסִיפִים" : "מוֹרִידִים";
-  const txt = left===null ? "?" : left===0 ? "" : sign+left;
-  el.innerHTML=`<div class="slot" id="chgSlot">${left===0?"":icon(t.item)}<span class="n ${t.op==="-"?"minus":"plus"}">${txt}</span></div><div>${label}</div>`;
+function typeKey(k){
+  if(!Q || Q.done || $("#kbd").classList.contains("off")) return;
+  if(k==="bs") Q.typed=Q.typed.slice(0,-1);
+  else if(k==="enter") return check();
+  else { if(Q.typed.length>=2) return; Q.typed=(Q.typed+k).replace(/^0(\d)/,"$1"); }
+  fieldUI();
 }
+addEventListener("keydown",e=>{ if(!$("#play").classList.contains("on")) return;
+  if(/^[0-9]$/.test(e.key)) typeKey(e.key); else if(e.key==="Backspace") typeKey("bs"); else if(e.key==="Enter") typeKey("enter"); });
 
-/* ---------- flying items ---------- */
-function fly(fromEl, toEl, id, mode){
-  const a=fromEl.getBoundingClientRect(), s=slots[0].getBoundingClientRect();
-  const size=s.width;
-  const d=document.createElement("div"); d.className="fly"; d.innerHTML=icon(id);
-  Object.assign(d.style,{width:size+"px",height:size+"px",left:(a.left+a.width/2-size/2)+"px",top:(a.top+a.height/2-size/2)+"px"});
-  document.body.appendChild(d);
-  let frames;
-  if(mode==="spill") frames=[{transform:"none",opacity:1},{transform:`translate(${(Math.random()-.5)*60}px, ${size*0.9}px) rotate(160deg)`,opacity:.9,offset:.6},{transform:`translate(${(Math.random()-.5)*90}px, ${size*2.2}px) rotate(200deg)`,opacity:0}];
-  else if(mode==="burst"){ const ang=Math.random()*Math.PI*2, r=size*3; frames=[{transform:"none",opacity:1},{transform:`translate(${Math.cos(ang)*r}px, ${Math.sin(ang)*r-size}px) rotate(${rnd(720)-360}deg) scale(.6)`,opacity:0}]; }
-  else { const b=toEl.getBoundingClientRect();
-    const dx=(b.left+b.width/2)-(a.left+a.width/2), dy=(b.top+b.height/2)-(a.top+a.height/2);
-    frames=[{transform:"none"},{transform:`translate(${dx*.5}px, ${dy*.5-40}px) scale(1.15)`},{transform:`translate(${dx}px, ${dy}px) scale(${Math.min(1.3,b.width/size)})`}]; }
-  const anim=d.animate(frames,{duration:(mode==="spill"||mode==="burst"?650:420)*(S.speed||1), easing:"ease-in-out", fill:"forwards"});
-  return anim.finished.then(()=>d.remove());
+/* ---------------- checking ---------------- */
+async function countAlong(){
+  // number the buckets left in the inventory, one by one
+  $("#kbd").classList.add("off");
+  const els=[...document.querySelectorAll("#inv .item")];
+  for(let i=0;i<els.length;i++){ const n=document.createElement("span"); n.className="num"; n.textContent=i+1; els[i].appendChild(n); els[i].classList.add("pop"); await sleep(550); }
+  await sleep(500);
 }
-function step(html, cls){ const s=document.createElement("span"); s.innerHTML=html; if(cls) s.className=cls; $("#steps").appendChild(s); }
-async function flashRow(r){ const row=document.querySelectorAll("#rows .row")[r]; if(!row) return; row.classList.add("flash"); await sleep(700); row.classList.remove("flash"); }
-
-/* ---------- the explanation animation ---------- */
-async function runAnim(final){
-  busy=true; $("#pad").classList.add("off");
-  const t=Q.t, it=t.item; let cur=Q.a; const A=Q.a, B=Q.b;
-  setCount(A); renderChange(); $("#steps").innerHTML="";
-  const ans = final ? Q.ans : "?";
-  if(t.op==="+" || t.op==="fill"){
-    let src;
-    if(t.kind==="craft"){ // ingredients go in, the output comes out, then lands in the inventory
-      const r=RECIPES[t.recipe], out=$("#outSlot");
-      document.querySelectorAll("#station .grid3 .it").forEach(e=>{ e.animate([{opacity:1},{opacity:0,transform:"scale(.4)"}],{duration:400,fill:"forwards"}); });
-      await sleep(450); out.innerHTML=icon(r.out)+`<span class="n">${r.n}</span>`; out.classList.add("pop"); await sleep(500); src=out;
-    } else src=$("#evIcon");
-    for(let i=0;i<B;i++){
-      if(Q.bridge && cur===10){ step(`${A} + ${10-A} = 10`,"ten"); await flashRow(0); }
-      const target=slots[cur];
-      await fly(src, target, it);
-      target.innerHTML=icon(it); target.classList.add("pop"); setTimeout(()=>target.classList.remove("pop"),400);
-      cur++; rowsFull();
-      renderChange(t.op==="fill" ? i+1 : B-i-1);
-      if(t.kind==="craft"){ const out=$("#outSlot"); const left=B-i-1; out.innerHTML= left? icon(t.item)+(left>1?`<span class="n">${left}</span>`:""):""; }
-      await sleep(110);
-    }
-    if(t.op==="fill"){ await flashRow(0); step(`${A} + ${final?B:"?"} = 10`,"ten"); }
-    else if(Q.bridge){ step(`10 + ${A+B-10} = ${ans}`); }
-    else if(cur===10||cur===20) await flashRow(cur/10-1);
-  } else {
-    const targets = t.kind==="craft" ? [...document.querySelectorAll("#station .grid3 .slot")].filter(s=>s.dataset.id===RECIPES[t.recipe].use) : null;
-    for(let i=0;i<B;i++){
-      if(Q.bridge && cur===10){ step(`${A} − ${A-10} = 10`,"ten"); await flashRow(0); }
-      const from=slots[cur-1];
-      from.innerHTML=""; cur--; rowsFull();
-      if(targets){ await fly(from, targets[i], it); targets[i].innerHTML=icon(it); }
-      else if(t.spill || t.burst){ fly(from, null, it, t.spill?"spill":"burst"); await sleep(t.spill?260:180); }
-      else await fly(from, $("#evIcon"), it);
-      renderChange(B-i-1);
-      await sleep(90);
-    }
-    if(targets){ await sleep(300); const r=RECIPES[t.recipe], out=$("#outSlot");
-      targets.forEach(s=>s.animate([{opacity:1},{opacity:.3}],{duration:300,fill:"forwards"}));
-      out.innerHTML=icon(r.out)+(r.n>1?`<span class="n">${r.n}</span>`:""); out.classList.add("pop"); }
-    if(t.spill||t.burst) await sleep(500);
-    if(Q.bridge) step(`10 − ${B-(A-10)} = ${ans}`);
-  }
-  Q.animated=true; busy=false; $("#pad").classList.remove("off");
-}
-
-/* ---------- keypad ---------- */
-function buildPad(){
-  const p=$("#pad"); p.innerHTML="";
-  const add=(txt,cls,fn)=>{ const b=document.createElement("button"); b.textContent=txt; if(cls) b.className=cls; b.onclick=fn; p.appendChild(b); };
-  [1,2,3,4,5].forEach(n=>add(n,"",()=>type(n)));
-  add("⌫","",()=>{ Q.typed=Q.typed.slice(0,-1); eqUI(); });
-  [6,7,8,9,0].forEach(n=>add(n,"",()=>type(n)));
-  add("✓","ok",check);
-  const h=document.createElement("button"); h.className="hint"; h.textContent="💡 תַּרְאֶה לִי"; h.style.gridColumn="1 / -1"; h.style.fontSize="24px";
-  h.onclick=async()=>{ if(busy) return; Q.hinted=true; await runAnim(false); }; p.appendChild(h);
-}
-function type(n){ if(busy) return; if(Q.typed.length>=2) Q.typed=""; Q.typed+=String(n); if(Q.typed.length===2 && Q.typed[0]==="0") Q.typed=String(n); eqUI(); }
-
 async function check(){
-  if(busy || !Q.typed) return;
+  if(Q.typed==="") return;
   const v=parseInt(Q.typed,10);
-  logAnswer(v);
+  S.log.push({d:Date.now(),op:Q.st.op,a:Q.a,b:Q.b,ans:Q.ans,v,m:moveDone()?1:0,s:Math.round((Date.now()-Q.t0)/1000)}); if(S.log.length>500) S.log=S.log.slice(-500);
   if(v===Q.ans){
-    const first = Q.tries===0 && !Q.hinted;
-    R.results[R.i] = first;
-    if(first){ S.gems++; gemsUI(); }
-    let newRecipe=null;
-    if(Q.t.recipe && !S.recipes[Q.t.recipe]){ S.recipes[Q.t.recipe]=1; newRecipe=Q.t.recipe; }
-    save();
-    $("#feedback").textContent = pick(["נָכוֹן!","יֵשׁ! נָכוֹן!","מְעֻלֶּה, אוֹרִי!","כׇּל הַכָּבוֹד!"]) + (first?" +1":"");
-    eqUI(true);
-    $("#pad").style.display="none";
-    if(S.animAfter || Q.animated){ await runAnim(true); eqUI(true); }
-    if(newRecipe) toast(`<i>${ITEMS[RECIPES[newRecipe].out]}</i> מַתְכּוֹן חָדָשׁ: ${RECIPES[newRecipe].name}`, 2600);
-    $("#next").style.display="block";
+    Q.done=true; const first=Q.tries===0; R.res[R.i]=first; if(first) S.gems++; save(); gemsUI();
+    $("#msg").textContent = pick(["נָכוֹן!","כׇּל הַכָּבוֹד, אוֹרִי!","יֵשׁ! נָכוֹן!"]) + (first?" +1 💎":"");
+    render(); fieldUI(Q.typed); $("#next").style.display="block";
   } else {
-    Q.tries++;
-    const b=$("#ansBox"); b.classList.remove("bad"); void b.offsetWidth; b.classList.add("bad");
+    Q.tries++; save();
+    const f=$("#field"); f.classList.remove("bad"); void f.offsetWidth; f.classList.add("bad");
     if(Q.tries===1){
-      $("#feedback").textContent="כִּמְעַט. בּוֹא נִרְאֶה בְּיַחַד.";
-      await sleep(600); Q.typed=""; eqUI(); await runAnim(false);
-      $("#feedback").textContent="עַכְשָׁו נַסֵּה שׁוּב.";
+      $("#msg").textContent="כִּמְעַט! בּוֹא נִסְפֹּר יַחַד.";
+      if(!moveDone()){ // put the right buckets in place first, so the count shows the answer's picture
+        if(Q.st.op==="-"){ Q.items.forEach(i=>i.z="inv"); Q.items.slice(-Q.b).forEach(i=>i.z="zone"); } else Q.items.forEach(i=>i.z="inv");
+        render(); await sleep(500);
+      }
+      await countAlong();
+      Q.typed=""; $("#msg").textContent="עַכְשָׁו כְּתֹב שׁוּב."; render();
     } else {
-      R.results[R.i]=false; save();
-      $("#feedback").textContent=`הַתְּשׁוּבָה הִיא ${Q.ans}.`;
-      eqUI(true); $("#pad").style.display="none";
-      await runAnim(true);
-      $("#next").style.display="block";
+      Q.done=true; R.res[R.i]=false; save();
+      $("#msg").textContent=`הַתְּשׁוּבָה: ${Q.ans}`;
+      render(); fieldUI(String(Q.ans)); $("#next").style.display="block";
     }
   }
 }
-$("#next").onclick=()=>{ if(busy) return; R.i++; if(R.i>=ROUND) endRound(); else loadQuestion(); };
-
-function logAnswer(v){
-  S.log.push({d:Date.now(), l:Q.lvl, op:Q.t.op, a:Q.a, b:Q.b, ans:Q.ans, v, h:Q.hinted?1:0, s:Math.round((Date.now()-Q.t0)/1000)});
-  if(S.log.length>400) S.log=S.log.slice(-400);
-  save();
-}
-
+$("#next").onclick=()=>{ R.i++; if(R.i>=ROUND) endRound(); else loadQ(); };
 function endRound(){
-  const good=R.results.filter(Boolean).length, l=R.lvl;
-  S.best[l]=Math.max(S.best[l]||0, good);
-  const pass = good>=6, wasNew = pass && !S.done[l] && l<3;
-  if(pass) S.done[l]=1;
-  save(); pipsUI();
-  $("#celeArt").innerHTML=ITEMS[pass?"diamond":"emerald"];
-  $("#celeText").innerHTML = `סִיַּמְתָּ!<br>${good} מִתּוֹךְ ${ROUND} בְּנִסָּיוֹן רִאשׁוֹן` + (wasNew?`<br>נִפְתַּח שָׁלָב חָדָשׁ: ${LEVELS[l+1].name}`:"");
+  const good=R.res.filter(Boolean).length; pipsUI();
+  $("#celeArt").innerHTML=ITEMS[good>=6?"diamond":"emerald"];
+  $("#celeText").innerHTML=`סִיַּמְתָּ!<br>${good} מִתּוֹךְ ${ROUND} בְּנִסָּיוֹן רִאשׁוֹן`;
   $("#cele").classList.add("on");
-  $("#celeOk").onclick=()=>{ $("#cele").classList.remove("on"); renderHome(); show("home"); };
 }
+$("#celeOk").onclick=()=>{ $("#cele").classList.remove("on"); gemsUI(); show("home"); };
+$("#startBtn").onclick=startRound;
+$("#homeBtn").onclick=()=>{ gemsUI(); show("home"); };
 
-$("#homeBtn").onclick=()=>{ if(busy) return; renderHome(); show("home"); };
+$("#say").onclick=()=>{ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(Q.st.lines(Q.a,Q.b).join(" ")+" "+Q.st.q);
+  u.lang="he-IL"; u.rate=.85; const v=speechSynthesis.getVoices().find(v=>/^(he|iw)/i.test(v.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }catch(e){} };
 
-/* ---------- read aloud (Hebrew voice if the tablet has one) ---------- */
-$("#say").onclick=()=>{ try{ speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(Q.t.lines(Q.a,Q.b).join(" ")+" "+Q.t.q); u.lang="he-IL"; u.rate=.85;
-  const v=speechSynthesis.getVoices().find(v=>/^he|^iw/i.test(v.lang)); if(v) u.voice=v;
-  speechSynthesis.speak(u); }catch(e){} };
-
-/* ---------- parent panel ---------- */
+/* ---------------- parents ---------------- */
 function renderStats(){
-  const rows=[1,2,3].map(l=>{ const L=S.log.filter(x=>x.l===l); if(!L.length) return "";
-    const right=L.filter(x=>x.v===x.ans).length;
-    const misses=L.filter(x=>x.v!==x.ans).slice(-8).map(x=>`<span class="miss">${x.op==="fill"?`${x.a} + ? = 10`:`${x.a} ${x.op==="+"?"+":"−"} ${x.b}`} → ${x.v}</span>`).join("");
-    return `<div><b>${LEVELS[l].name}</b>: ${L.length} תשובות, ${Math.round(100*right/L.length)}% נכונות${misses?`<br>טעויות אחרונות: ${misses}`:""}</div>`; }).join("");
-  $("#stats").innerHTML = rows || "עוד אין תשובות.";
+  const L=S.log; if(!L.length){ $("#stats").textContent="עוד אין תשובות."; return; }
+  const right=L.filter(x=>x.v===x.ans).length, plus=L.filter(x=>x.op==="+"), minus=L.filter(x=>x.op==="-");
+  const pct=a=>a.length?Math.round(100*a.filter(x=>x.v===x.ans).length/a.length)+"%":"—";
+  $("#stats").innerHTML=`${L.length} תשובות, ${Math.round(100*right/L.length)}% נכונות. חיבור ${pct(plus)}, חיסור ${pct(minus)}.<br>טעויות אחרונות: `+
+    L.filter(x=>x.v!==x.ans).slice(-10).map(x=>`<span>${x.a} ${x.op==="-"?"−":"+"} ${x.b} → ${x.v}</span>`).join("");
 }
-$("#parentBtn").onclick=()=>{ $("#optUnlock").checked=!!S.unlockAll; $("#optSpeed").value=String(S.speed||1); $("#optAfter").checked=!!S.animAfter; renderStats(); $("#parent").classList.add("on"); };
-$("#parentClose").onclick=()=>{ S.unlockAll=$("#optUnlock").checked; S.speed=parseFloat($("#optSpeed").value); S.animAfter=$("#optAfter").checked; save(); $("#parent").classList.remove("on"); renderHome(); };
-$("#resetBtn").onclick=()=>{ if(!confirm("לאפס את כל ההתקדמות?")) return; S=blank(); save(); $("#parent").classList.remove("on"); renderHome(); };
-$("#fsBtn").onclick=()=>{ const d=document.documentElement; (document.fullscreenElement? document.exitFullscreen() : d.requestFullscreen&&d.requestFullscreen())?.catch?.(()=>{}); };
+$("#parentBtn").onclick=()=>{ $("#optDrag").checked=!!S.requireDrag; renderStats(); $("#resetBtn").textContent="איפוס התקדמות"; $("#parent").classList.add("on"); };
+$("#parentClose").onclick=()=>{ S.requireDrag=$("#optDrag").checked; save(); $("#parent").classList.remove("on"); };
+$("#resetBtn").onclick=e=>{ const b=e.currentTarget; if(b.dataset.sure){ S=blank(); save(); gemsUI(); $("#parent").classList.remove("on"); delete b.dataset.sure; return; } b.dataset.sure=1; b.textContent="בטוח? לחץ שוב"; };
+$("#fsBtn").onclick=()=>{ const d=document.documentElement; try{ (document.fullscreenElement?document.exitFullscreen():d.requestFullscreen()).catch(()=>{}); }catch(e){} };
 
-buildPad(); renderHome();
+buildKbd(); gemsUI();
 if("serviceWorker" in navigator) addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
-</script>
+}</script>
 </body>
 </html>
